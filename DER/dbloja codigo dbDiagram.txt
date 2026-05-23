@@ -1,0 +1,105 @@
+Table tb_pessoa{
+  pk_id_pessoa int [pk, increment]
+  primeiro_nome varchar(40) [not null]
+  sobrenome varchar(100) [not null]
+  cpf char(11) [not null, unique]
+  data_nascimento date [not null]
+  genero enum('Masculino', 'Feminino', 'Outro') [not null]
+}
+table tb_fornecedor{
+  pk_id_fornecedor int [pk, increment]
+  nome_fornecedor varchar(70) [not null, unique]
+}
+table tb_funcionario{
+  pk_id_funcionario int [pk, increment]
+  fk_id_pessoa int
+}
+table tb_cargo_funcionario{
+  pk_id_cargo_funcionario int [pk, increment]
+  cargo enum('Gerente', 'Supervisor', 'Vendedor', 'Caixa', 
+  'Estoquista', 'Atendente', 'Comprador', 'Auxiliar_administrativo', 
+  'Analista_financeiro', 'Analista_rh', 'Tecnico_ti', 'Entregador', 
+  'Operador_logistica') [not null]
+  salario_base decimal
+}
+table tb_folha_pagamento{
+  pk_id_folha_pagamento int [pk, increment]
+  mes int [not null]
+  ano int [not null]
+  data_abertura date [not null]
+  data_fechamento date [not null]
+  status_folha enum('Aberta', 'Fechada', 'Paga', 'Cancelada') [not null]
+  indexes {
+    (mes, ano) [unique]
+  }
+}
+table tb_contrato_funcionario{
+  pk_id_contrato_funcionario int [pk, increment]
+  fk_id_funcionario int
+  fk_id_cargo_funcionario int
+  data_contratacao date
+  status_contratacao enum('Ativo', 'Inativo')
+  tipo_contratacao enum('CLT', 'PJ')
+  salario_contrato decimal
+}
+table tb_item_folha_pagamento{
+   pk_id_item_folha_pagamento int [pk, increment]
+  fk_id_folha_pagamento int [not null]
+  fk_id_contrato_funcionario int [not null]
+  salario_base decimal(10,2) [not null]
+  valor_bonus decimal(10,2) [not null, default: 0]
+  valor_desconto decimal(10,2) [not null, default: 0]
+  valor_liquido decimal(10,2) [not null]
+  data_pagamento date
+
+  indexes {
+    (fk_id_folha_pagamento, fk_id_contrato_funcionario) [unique]
+  }
+}
+table tb_numero{
+  pk_ddd char(2)
+  pk_numero char(9)
+  fk_id_pessoa int
+  fk_id_fornecedor int
+  tipo_numero enum('Pessoa fisica', 'Empresarial')
+  indexes {
+    (pk_ddd, pk_numero, fk_id_pessoa) [unique]
+  }
+  indexes {
+    (pk_ddd, pk_numero, fk_id_fornecedor) [unique]
+  }
+}
+table tb_email{
+  pk_email varchar(70) [pk]
+  fk_id_pessoa int
+  fk_id_fornecedor int
+  tipo_email enum('pessoa fisica', 'empresarial')
+  indexes {
+    (pk_email, fk_id_pessoa) [unique]
+  }
+  indexes {
+    (pk_email, fk_id_fornecedor) [unique]
+  }
+}
+table tb_contrato_fornecedor{
+  pk_id_contrato_fornecedor int [pk, increment]
+  fk_id_fornecedor int
+  data_contrato date
+  status_contrato enum('Ativo', 'Cancelado', 'Pausado', 'Concluido')
+  indexes {
+    (fk_id_fornecedor, pk_id_contrato_fornecedor, data_contrato) [unique]
+  }
+}
+
+
+//Conexoes
+Ref: tb_pessoa.pk_id_pessoa < tb_numero.fk_id_pessoa
+Ref: tb_pessoa.pk_id_pessoa < tb_email.fk_id_pessoa
+Ref: tb_fornecedor.pk_id_fornecedor < tb_numero.fk_id_fornecedor
+Ref: tb_fornecedor.pk_id_fornecedor < tb_email.fk_id_fornecedor
+Ref: tb_fornecedor.pk_id_fornecedor < tb_contrato_fornecedor.fk_id_fornecedor
+Ref: tb_funcionario.pk_id_funcionario - tb_pessoa.pk_id_pessoa
+Ref: tb_funcionario.pk_id_funcionario - tb_contrato_funcionario.pk_id_contrato_funcionario
+Ref: tb_contrato_funcionario.fk_id_cargo_funcionario - tb_cargo_funcionario.pk_id_cargo_funcionario
+Ref: tb_item_folha_pagamento.fk_id_folha_pagamento > tb_folha_pagamento.pk_id_folha_pagamento
+Ref: tb_item_folha_pagamento.fk_id_contrato_funcionario > tb_contrato_funcionario.pk_id_contrato_funcionario
