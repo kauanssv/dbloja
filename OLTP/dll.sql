@@ -1,9 +1,8 @@
-<<<<<<< HEAD
+
 create database dbloja;
 use dbloja;
 
 /*Criando as tabelas*/
-=======
 drop database dbloja;
 create database dbloja;
 use dbloja;
